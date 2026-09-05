@@ -3,5 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "A local product-research dashboard with a simple Node API.",
-  "scripts": {"start": "node server.js"}
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "uuid": "^9.0.0"
+  }
 }

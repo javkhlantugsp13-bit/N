@@ -16,7 +16,7 @@ exports.handler = async function(event) {
     const code = createUserCode(name);
     const now = (new Date()).toISOString();
     const user = {
-      id, name, email, passwordHash: hash, signupAt: now, lastLogin: now, status: 'Active', code, plan:'Starter', revenue:0, views:0, purchases:0
+      id, name, email, passwordHash: hash, signupAt: now, lastLogin: now, status: 'Active', code, plan:'Starter', revenue:0, views:0, purchases:0, saved: []
     };
     store.users = [...(store.users || []), user];
     writeStore(store);

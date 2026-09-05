@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Liftly — User Page</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="account">
+      <div class="account-heading">
+        <div>
+          <div class="eyebrow"><i></i> Your seller space</div>
+          <h2 id="userName">User</h2>
+          <div id="userCode" style="font-family:monospace;color:#666;margin-top:6px"></div>
+        </div>
+        <div class="account-summary">
+          <button id="refresh" class="secondary">Refresh</button>
+        </div>
+      </div>
+
+      <section class="welcome-card">
+        <div class="welcome-mark">✦</div>
+        <div>
+          <h3 id="welcomeTitle">Welcome</h3>
+          <p id="welcomeText">Manage your saved products and track progress here.</p>
+        </div>
+        <div>
+          <h4>Saved products</h4>
+          <ul id="savedList"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="user.js"></script>
+  </body>
+</html>
