@@ -1,0 +1,12 @@
+// data/store.json will be created on first run by the data-store adapter; keep an example file if desired
+{
+  "dashboard": {
+    "storeName": "Northstar Goods",
+    "netSales": 12480,
+    "orders": 186
+  },
+  "users": [],
+  "products": [],
+  "queue": [],
+  "plans": []
+}
