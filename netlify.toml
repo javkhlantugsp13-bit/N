@@ -1,0 +1,19 @@
+[build]
+  publish = "."
+  command = "echo 'No build step required'"
+
+[dev]
+  # Local dev will use Netlify CLI (netlify dev) which will run functions from netlify/functions
+  command = "netlify dev"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
