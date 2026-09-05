@@ -81,11 +81,65 @@ $('#openLogin').addEventListener('click', () => { loginOverlay.classList.add('op
 $('#closeLogin').addEventListener('click', closeLogin);
 loginOverlay.addEventListener('click', event => { if (event.target === loginOverlay) closeLogin(); });
 document.addEventListener('keydown', event => { if (event.key === 'Escape') closeLogin(); });
+
+// social provider buttons call /api/auth/provider
 document.querySelectorAll('.social-login').forEach(button => button.addEventListener('click', async () => {
-  try { const response = await fetch('/api/auth/provider', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:button.dataset.provider})}); const result = await response.json(); showToast(result.message); } catch { showToast(`${button.dataset.provider} sign-in needs to be connected in the live app.`); }
+  try {
+    const response = await fetch('/api/auth/provider', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:button.dataset.provider})});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || result.message);
+    showToast(result.message || 'Redirecting to provider...');
+  } catch (err) {
+    showToast(err.message || `${button.dataset.provider} sign-in needs to be connected in the live app.`);
+  }
 }));
+
+// Email / password login wiring
 $('#emailLoginButton').addEventListener('click', async () => {
   const email = $('#emailLogin').value.trim();
+  const name = (document.getElementById('nameLogin') && document.getElementById('nameLogin').value) ? document.getElementById('nameLogin').value.trim() : '';
+  const password = (document.getElementById('passwordLogin') && document.getElementById('passwordLogin').value) ? document.getElementById('passwordLogin').value : '';
   if (!email || !$('#emailLogin').checkValidity()) return showToast('Please enter a valid email address.');
-  try { const response = await fetch('/api/auth/email', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email})}); const result = await response.json(); showToast(result.message || result.error); } catch { showToast('Your email sign-in link is ready to send.'); }
+  try {
+    // If name+password present => signup
+    if (name && password) {
+      const res = await fetch('/api/auth/signup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,password})});
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || result.message || 'Signup failed.');
+      showToast(result.message || 'Account created');
+      closeLogin();
+      return;
+    }
+    // If password present => login
+    if (password) {
+      const res = await fetch('/api/auth/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password})});
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || result.message || 'Login failed.');
+      showToast(result.message || 'Signed in');
+      closeLogin();
+      return;
+    }
+    // Fallback: legacy email-only flow
+    const res = await fetch('/api/auth/email', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email})});
+    const result = await res.json();
+    showToast(result.message || result.error || 'Check your email for a sign-in link.');
+    closeLogin();
+  } catch (err) {
+    showToast(err.message || 'Auth request failed.');
+  }
+});
+
+// Admin mode activation via '=' key
+document.addEventListener('keydown', (e) => {
+  if (e.key === '=') {
+    const username = window.prompt('Enter admin username (development only)');
+    if (!username) return;
+    fetch('/api/admin/enable', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username})})
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) return showToast(res.error);
+        showToast(res.message || 'Admin enabled for this session');
+        closeLogin();
+      }).catch(() => showToast('Could not enable admin mode (dev-only).'));
+  }
 });
