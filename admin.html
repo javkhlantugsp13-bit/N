@@ -1,1 +1,74 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Liftly Admin</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="portal.css"></head><body><main class="portal"><header class="portal-nav"><a class="brand" href="/"><span>l</span>liftly</a><div><a href="/">Seller view</a><a class="active" href="/admin.html">Admin</a><a href="/payments.html">Billing</a></div><button class="admin-badge">Admin mode</button></header><section class="portal-title"><p>ADMIN CONSOLE / SELLER MANAGEMENT</p><h1>Keep every store<br>moving <em>forward.</em></h1><span>Update seller performance, review activity, and manage plans from one place.</span></section><section class="admin-layout"><aside class="user-list"><div class="list-title"><b>Sellers</b><span id="userCount">0 accounts</span></div><div id="users"></div></aside><section class="edit-panel"><div class="panel-label">SELLER PERFORMANCE</div><div id="editorEmpty">Select a seller to review their account.</div><form id="metricsForm" hidden><div class="seller-top"><div class="avatar" id="avatar">A</div><div><h2 id="sellerName">Alex Chen</h2><p id="sellerEmail"></p></div><span id="sellerPlan" class="plan-chip"></span></div><div class="form-grid"><label>Revenue <span>USD, total</span><input id="revenue" type="number" min="0" step="0.01" required></label><label>Video views <span>Total views</span><input id="views" type="number" min="0" step="1" required></label><label>Purchases <span>Completed orders</span><input id="purchases" type="number" min="0" step="1" required></label></div><div class="admin-note"><b>Tip</b> These values appear on the seller’s performance dashboard after saving.</div><button class="save-button" type="submit">Save seller performance <span>→</span></button></form></section></section></main><div id="toast" class="portal-toast"></div><script src="admin.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Liftly Admin</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .admin-hero{padding:18px;border-radius:12px;background:linear-gradient(180deg,#fff,#fffaf3);box-shadow:var(--shadow);margin-bottom:18px}
+      .user-list{padding:0;margin:0;list-style:none}
+      .user-list li{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(15,23,42,0.04)}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="brand"><div class="logo">L</div><div class="brand-name">liftly</div></div>
+        <nav class="nav">
+          <a href="/">Home</a>
+          <a href="/payments.html">Billing</a>
+          <button id="signOut" class="button secondary">Sign out</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="admin-hero">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div>
+              <h2>Admin — Users</h2>
+              <p class="small">View and manage registered users. Passwords are never exposed.</p>
+            </div>
+            <div class="row">
+              <button id="devEnable" class="button">Enable Dev Admin (Norway)</button>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <ul id="users" class="user-list"></ul>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      async function fetchUsers(){
+        try{
+          const res = await fetch('/api/admin/users');
+          if (!res.ok){ const b = await res.json(); alert(b.error || 'Unauthorized'); return; }
+          const users = await res.json();
+          const el = document.getElementById('users'); el.innerHTML = '';
+          users.forEach(u=>{
+            const li = document.createElement('li');
+            li.innerHTML = `<div><strong>${u.name}</strong><div class="small">${u.email} • ${u.signupAt}</div></div><div><span class="tag">${u.plan}</span></div>`;
+            el.appendChild(li);
+          });
+        }catch(e){ console.error(e); alert('Unable to load users'); }
+      }
+
+      document.getElementById('devEnable').addEventListener('click', async ()=>{
+        try{
+          const res = await fetch('/api/admin/enable', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username:'Norway' }) });
+          const b = await res.json(); if (!res.ok) return alert(b.error||'Failed'); alert(b.message || 'Enabled'); fetchUsers();
+        }catch(e){ console.error(e); alert('Unable to enable dev admin'); }
+      });
+
+      document.getElementById('signOut').addEventListener('click', async ()=>{
+        await fetch('/api/auth/logout', { method:'POST' }); location.href = '/';
+      });
+
+      // Initial load
+      fetchUsers();
+    </script>
+  </body>
+</html>
